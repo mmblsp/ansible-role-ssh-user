@@ -1,3 +1,3 @@
-src: https://github.com/mmblsp/ansible_linux_python3.git
+src: https://github.com/mmblsp/ansible-role-linux-python3.git
 version: v1.0.0
 name: linux_python3

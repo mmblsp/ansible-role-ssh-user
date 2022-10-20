@@ -31,4 +31,5 @@ Apache-2.0
 
 ## Author Information
 
-Anatoliy Zhuchkov
+- [habr](https://habr.com/ru/users/mmblsp/)
+- mmblspace@yandex.ru
