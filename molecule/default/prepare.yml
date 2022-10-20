@@ -1,7 +1,7 @@
 ---
 - name: Prepare
   hosts: all
-  tasks:  
+  tasks:
     - name: debug python
       debug:
         msg: "Prepare"
