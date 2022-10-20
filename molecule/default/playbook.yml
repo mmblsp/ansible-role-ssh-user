@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  roles:
+    - role: ssh_user
+      vars:
+        ssh_user_sudo: true
+        ssh_user_create_user: "hdfs"

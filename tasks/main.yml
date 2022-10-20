@@ -1,0 +1,62 @@
+---
+- name: Import variables specific to distribution
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "vars/{{ ansible_facts['os_family'] }}.yml"
+    - "vars/main.yml"
+
+- name: Group in user
+  set_fact:
+    _ssh_user_groups: ["{{ ssh_user_create_user }}"]
+
+- name: Add groups in user
+  set_fact:
+    _ssh_user_groups: "{{ _ssh_user_groups + ssh_user_groups }}"
+  when: ( ssh_user_groups is defined ) and ( ssh_user_groups | type_debug == "list" )
+
+- name: Sudo group in user
+  set_fact:
+    _ssh_user_groups: "{{ _ssh_user_groups +  [ ssh_users_sudo_group ] }}"
+  when: ssh_user_sudo
+
+- name: Create group
+  group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ _ssh_user_groups }}"
+
+- name: Create user
+  user:
+    name: "{{ ssh_user_create_user }}"
+    shell: "/bin/bash"
+    groups: "{{ _ssh_user_groups }}"
+    home: "/home/{{ ssh_user_create_user }}"
+
+- name: Check that the id_rsa.pub exists
+  stat:
+    path: "/home/{{ ssh_user_create_user }}/.ssh/id_rsa.pub"
+  register: stat_result_id_rsa
+
+- name: Create a 2048-bit SSH key for user {{ ssh_user_create_user }}
+  user:
+    name: "{{ ssh_user_create_user }}"
+    generate_ssh_key: "{{ ssh_user_create_ssh_key }}"
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa
+  when: not stat_result_id_rsa.stat.exists
+
+- name: Fetch slurp public ssh keys
+  slurp:
+    src: "/home/{{ ssh_user_create_user }}/.ssh/id_rsa.pub"
+  register: ssh_keys
+
+- name: Deploy keys on cluster servers
+  authorized_key:
+    user: "{{ ssh_user_create_user }}"
+    key: "{{ item[0] }}"
+    state: present
+  delegate_to: "{{ item[1] }}"
+  with_nested:
+    - "{{ ssh_keys.content | b64decode }}"
+    - "{{ groups[ssh_user_put_ssh_key_for_group_name] | reject('search', inventory_hostname) | list }}"

@@ -1,0 +1,5 @@
+.venv
+.vagrant
+.pytest_cache
+*.log
+__pycache__

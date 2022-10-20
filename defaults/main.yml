@@ -1,0 +1,6 @@
+---
+ssh_user_create_user: "hdfs"
+ssh_user_sudo: false
+ssh_user_groups: []
+ssh_user_create_ssh_key: true
+ssh_user_put_ssh_key_for_group_name: "cluster"
